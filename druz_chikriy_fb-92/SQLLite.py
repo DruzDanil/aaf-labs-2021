@@ -38,7 +38,7 @@ INPT = input()
 if INPT == "1":
     INPT = "cmd.txt"
     if not debug:
-        INPT = input()
+        INPT = input("Enter file name:")
     else:
         print("cmd.txt")
     try:
@@ -48,7 +48,7 @@ if INPT == "1":
         print("Unable to open file")
         exit()
 if INPT == "2":
-    cmdfile = input("Enter cmd: ")
+    cmdfile = input("Enter cmd:")
 
 cmdsRaw = []
 buffer = []
