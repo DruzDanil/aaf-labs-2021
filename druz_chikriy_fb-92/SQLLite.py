@@ -31,153 +31,143 @@ def isKeywordToStart(word):
             return True
     return False
 
-debug = True
+debug = False
+cmdfile = ""
+while(cmdfile != "exit"):
+    print("Welcome to lab1!\nEnter cmds")
+    cmdfile = input()
 
-print("Welcome to lab1!\n1 for file inpt, 2 for console:")
-INPT = input()
-if INPT == "1":
-    INPT = "cmd.txt"
-    if not debug:
-        INPT = input("Enter file name:")
-    else:
-        print("cmd.txt")
-    try:
-        cmdfile = open(INPT, 'r')
-        print("File opened")
-    except Exception:
-        print("Unable to open file")
-        exit()
-if INPT == "2":
-    cmdfile = input("Enter cmd:")
+    cmdsRaw = []
+    buffer = []
 
-cmdsRaw = []
-buffer = []
+    for line in cmdfile:
+        if line.find(";") != -1:
+            buffer.append(line[0:line.find(";")])
+            cmdsRaw.append(buffer)
+            buffer = []
+        else:
+            buffer.append(line)
 
-for line in cmdfile:
-    if line.find(";") != -1:
-        buffer.append(line[0:line.find(";")])
-        cmdsRaw.append(buffer)
-        buffer = []
-    else:
-        buffer.append(line)
+    if debug:
+        print(cmdsRaw)
 
-if debug:
-    print(cmdsRaw)
+    cmds = []
 
-cmds = []
+    for cmd in cmdsRaw:
+        cmds.append(''.join(cmd))
 
-for cmd in cmdsRaw:
-    cmds.append(''.join(cmd))
+    if debug:
+        print(cmds)
 
-if debug:
-    print(cmds)
+    i = 0
+    while i < len(cmds):
+        cmds[i] = cmds[i].replace('\n',' ')
+        cmds[i] = cmds[i].replace('\t',' ')
+        cmds[i] = cmds[i].replace('\r',' ')
+        i += 1
 
-i = 0
-while i < len(cmds):
-    cmds[i] = cmds[i].replace('\n',' ')
-    cmds[i] = cmds[i].replace('\t',' ')
-    cmds[i] = cmds[i].replace('\r',' ')
-    i += 1
+    if debug:
+        print(cmds)
 
-if debug:
-    print(cmds)
+    buffer = []
+    for cmd in cmds:
+        if not isKeywordToStart(cmd.split(' ')[0]) or len(cmd.split("\"")) %2 != 1:
+            print("Unsupported command: " + cmd)
+            buffer.append(cmd)
 
-buffer = []
-for cmd in cmds:
-    if not isKeywordToStart(cmd.split(' ')[0]) or len(cmd.split("\"")) %2 != 1:
-        print("Unsupported command: " + cmd)
-        buffer.append(cmd)
+    for wrongCMD in buffer:
+        cmds.remove(wrongCMD)
 
-for wrongCMD in buffer:
-    cmds.remove(wrongCMD)
+    if debug:
+        print(cmds)
 
-if debug:
-    print(cmds)
-
-parsedCmds = []
-#buffer = []
-i = 0
-for cmd in cmds[:]:
-    cmds[i] = cmds[i] + ';'
-    i = i+1
-print(cmds)
-for cmd in cmds:
-        cmdtype = cmd.split(' ')[0].lower()
-        if cmdtype == 'create':
-            try:
-                parsed = command_create.parseString(cmd)
-            except ParseException as pe:
-                print('Command is wrond')
-                print(pe)
-                print('Сolumn: {}'.format(pe.column))
-            else:
-                print('Table "' + parsed.table_name + '" was created.')
-                print('Created table contains the following columns:')
-                for i in parsed.colums:
-                    if (len(i) == 1):
-                        print(i[0] + ' - non-indexed')
-                    else:
-                        print(i[0] + ' - indexed')
-            pass
-        if cmdtype == 'insert':
-            try:
-                parsed = command_insert.parseString(cmd)
-            except ParseException as pe:
-                print('Command is wrond')
-                print(pe)
-                print('Сolumn: {}'.format(pe.column))
-            else:
-                print('1 row has been inserted into "' + parsed.table_name + '".')
-                print('Created row contains the following values:')
-                for i in parsed.value:
-                    print(i)
-            pass
-        if cmdtype == 'select':
-            try:
-                parsed = command_select.parseString(cmd)
-            except ParseException as pe:
-                print('Command is wrond')
-                print(pe)
-                print('Сolumn: {}'.format(pe.column))
-            else:
-                if parsed[1]=='*':
-                    print('All rows has been selected from table "' + parsed.table1_name + '"')
+    parsedCmds = []
+    #buffer = []
+    i = 0
+    for cmd in cmds[:]:
+        cmds[i] = cmds[i] + ';'
+        i = i+1
+    for cmd in cmds:
+            cmdtype = cmd.split(' ')[0].lower()
+            if cmdtype == 'create':
+                try:
+                    parsed = command_create.parseString(cmd)
+                except ParseException as pe:
+                    print('Command is wrond')
+                    print(pe)
+                    print('Сolumn: {}'.format(pe.column))
                 else:
-                    print('Rows has been selected from "' + parsed.table1_name + '".')
-                c = False
-                for b in parsed:
-                    if(b.lower() == 'where'):
-                        c = True
-                if (c):
-                    print('Selected rows satisfying following condition:')
-                    a = ''
-                    for i in parsed.condition:
-                        a = a + i
-                    print(a)
-            pass
-        if cmdtype == 'delete':
-            try:
-                parsed = command_delete.parseString(cmd)
-            except ParseException as pe:
-                print('Command is wrond')
-                print(pe)
-                print('Сolumn: {}'.format(pe.column))
-            else:
-                c = False
-                for b in parsed:
-                    if(b.lower() == 'where'):
-                        c = True
-                
-                if(c):
-                    print('Rows has been deleted from "' + parsed.table_name + '".')
-                    print('Deleted rows satisfying following condition:')
-                    a = ''
-                    for i in parsed.condition:
-                        a = a + i
-                    print(a)
+                    print('Table "' + parsed.table_name + '" was created.')
+                    print('Created table contains the following columns:')
+                    for i in parsed.colums:
+                        if (len(i) == 1):
+                            print(i[0] + ' - non-indexed')
+                        else:
+                            print(i[0] + ' - indexed')
+                print('\n')
+                pass
+            if cmdtype == 'insert':
+                try:
+                    parsed = command_insert.parseString(cmd)
+                except ParseException as pe:
+                    print('Command is wrond')
+                    print(pe)
+                    print('Сolumn: {}'.format(pe.column))
                 else:
-                    if(parsed[1].lower() != 'from'):
-                        print('Table "' + parsed.table_name + '" was deleted.')
+                    print('1 row has been inserted into "' + parsed.table_name + '".')
+                    print('Created row contains the following values:')
+                    for i in parsed.value:
+                        print(i)
+                print('\n')
+                pass
+            if cmdtype == 'select':
+                try:
+                    parsed = command_select.parseString(cmd)
+                except ParseException as pe:
+                    print('Command is wrond')
+                    print(pe)
+                    print('Сolumn: {}'.format(pe.column))
+                else:
+                    if parsed[1]=='*':
+                        print('All rows has been selected from table "' + parsed.table1_name + '"')
                     else:
-                        print('Table "' + parsed.table_name + '" was cleaned.')
-            pass
+                        print('Rows has been selected from "' + parsed.table1_name + '".')
+                    c = False
+                    for b in parsed:
+                        if(b.lower() == 'where'):
+                            c = True
+                    if (c):
+                        print('Selected rows satisfying following condition:')
+                        a = ''
+                        for i in parsed.condition:
+                            a = a + i
+                        print(a)
+                print('\n')
+                pass
+            if cmdtype == 'delete':
+                try:
+                    parsed = command_delete.parseString(cmd)
+                except ParseException as pe:
+                    print('Command is wrond')
+                    print(pe)
+                    print('Сolumn: {}'.format(pe.column))
+                else:
+                    c = False
+                    for b in parsed:
+                        if(b.lower() == 'where'):
+                            c = True
+                    
+                    if(c):
+                        print('Rows has been deleted from "' + parsed.table_name + '".')
+                        print('Deleted rows satisfying following condition:')
+                        a = ''
+                        for i in parsed.condition:
+                            a = a + i
+                        print(a)
+                    else:
+                        if(parsed[1].lower() != 'from'):
+                            print('Table "' + parsed.table_name + '" was deleted.')
+                        else:
+                            print('Table "' + parsed.table_name + '" was cleaned.')
+                print('\n')
+                pass
