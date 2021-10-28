@@ -33,20 +33,22 @@ def isKeywordToStart(word):
 
 debug = True
 
-print("Welcome to lab1!\nEnter cmd file path:")
-INPT = "cmd.txt"
-if not debug:
-    INPT = input()
-else:
-    print("cmd.txt")
-
-
-try:
-    cmdfile = open(INPT, 'r')
-    print("File opened")
-except Exception:
-    print("Unable to open file")
-    exit()
+print("Welcome to lab1!\n1 for file inpt, 2 for console:")
+INPT = input()
+if INPT == "1":
+    INPT = "cmd.txt"
+    if not debug:
+        INPT = input()
+    else:
+        print("cmd.txt")
+    try:
+        cmdfile = open(INPT, 'r')
+        print("File opened")
+    except Exception:
+        print("Unable to open file")
+        exit()
+if INPT == "2":
+    cmdfile = input("Enter cmd: ")
 
 cmdsRaw = []
 buffer = []
