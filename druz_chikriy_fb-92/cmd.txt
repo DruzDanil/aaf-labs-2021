@@ -6,9 +6,8 @@ INSERT cats ("10", "1", "Murzik");
 INSERT cats ("20", "1", "Pushok");
 SELECT * FROM cats;
 SELECT cat_id, cat_owner_id FROM cats WHERE cat_name = "Murzik";
-SELECT owner_name, cat_name 
-  FROM owners
-  LEFT_JOIN cats ON owner_id = cat_owner_id;
+SELECT owner_name, cat_name FROM owners LEFT_JOIN cats ON owner_id = cat_owner_id;
+SELECT owner_name, cat_name FROM owners LEFT_JOIN cats ON owner_id = cat_owner_id WHERE owner_name = "Vasya";
 DELETE FROM cats;
 DELETE cats WHERE name = "Murzik";
 DELETE cats ;

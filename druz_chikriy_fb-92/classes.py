@@ -2,6 +2,19 @@ def printError(error):
     print(colored("Error:", "red"), error)
 
 
+def multiLineInput(promt):
+    text = ""
+    while True:
+        x = input(promt)
+        if x:
+            text += x + " "
+        else:
+            break
+        if text[-2] == ";":
+            break
+    return text[:-1]
+
+
 try:
     from tabulate import tabulate
 except Exception:
@@ -204,7 +217,7 @@ class DB:
             pass
         print(colored(tabulate(rows, headers=headers, tablefmt="orgtbl"), "yellow"))
 
-    def selectAll(self, tabName):
+    def deleteTable(self, tabName):
         tableIndex = -1
         i = 0
         while i < len(self.tables):
@@ -214,24 +227,69 @@ class DB:
             i += 1
         if tableIndex == -1:
             printError("Table not found")
-            return
-        headers = []
-        rows = []
-        try:
-            len(self.tables[tableIndex].columns[0].elements)
-        except Exception:
-            # print(colored(tabulate(rows, headers=headers, tablefmt='orgtbl'), "yellow"))
-            print(colored("Empty table", "yellow"))
-            return
-        for col in range(0, len(self.tables[tableIndex].columns)):
-            headers.append(self.tables[tableIndex].columns[col].columnName)
-        for row in range(0, len(self.tables[tableIndex].columns[0].elements)):
-            rowOut = []
-            for index in range(0, len(self.tables[tableIndex].columns)):
-                rowOut.append(self.tables[tableIndex].columns[index].elements[row])
-            rows.append(rowOut)
-            pass
-        print(colored(tabulate(rows, headers=headers, tablefmt="orgtbl"), "yellow"))
+            return False
+        self.tables.pop(tableIndex)
+
+    def selectLeftJoinOnCond(
+        self,
+        tabName1,
+        tabName2,
+        colToPrint,
+        colToAnal,
+        colToJoin1,
+        colToJoin2,
+        condition,
+        condVal,
+    ):
+        print(tabName1, tabName2, colToPrint, colToAnal, colToJoin1, colToJoin2)
+        table1Index = -1
+        i = 0
+        while i < len(self.tables):
+            if self.tables[i].tableName == tabName1:
+                table1Index = i
+                break
+            i += 1
+        if table1Index == -1:
+            printError("Table 1 not found")
+            return False
+        table2Index = -1
+        i = 0
+        while i < len(self.tables):
+            if self.tables[i].tableName == tabName2:
+                table2Index = i
+                break
+            i += 1
+        if table2Index == -1:
+            printError("Table 2 not found")
+            return False
+        colToJoin1Index = -1
+        i = 0
+        while i < len(self.tables[table1Index].columns):
+            if self.tables[table1Index].columns[i].columnName == colToJoin1:
+                colToJoin1Index = i
+                break
+            i += 1
+        if colToJoin1Index == -1:
+            printError("Column to join 1 not found")
+            return False
+        colToJoin2Index = -1
+        i = 0
+        while i < len(self.tables[table2Index].columns):
+            if self.tables[table2Index].columns[i].columnName == colToJoin2:
+                colToJoin2Index = i
+                break
+            i += 1
+        if colToJoin2Index == -1:
+            printError("Column to join 2 not found")
+            return False
+        print("Indexes found")
+        columns = []
+        for name in colToPrint:
+            columns.append(column(name, False))
+        self.createTable("LEFT_JOIN TMPTABLE", columns)
+        self.selectNoCond("LEFT_JOIN TMPTABLE", "*")
+        # 2 цикла сюда
+        self.deleteTable("LEFT_JOIN TMPTABLE")
 
     def clearTable(self, tabName):
         tableIndex = -1
@@ -271,11 +329,14 @@ class DB:
         if columnIndex == -1:
             printError("Column not found")
             return
-        while i < len(self.tables[tableIndex].columns[columnIndex]):
+        while i < len(self.tables[tableIndex].columns[columnIndex].elements):
             if condition(
                 self.tables[tableIndex].columns[columnIndex].elements[i], condVal
             ):
-                self.tables[tableIndex].columns[columnIndex].elements.pop(i)
+                j = 0
+                while j < len(self.tables[tableIndex].columns):
+                    self.tables[tableIndex].columns[j].elements.pop(i)
+                    j += 1
                 i -= 2
             i += 1
 
