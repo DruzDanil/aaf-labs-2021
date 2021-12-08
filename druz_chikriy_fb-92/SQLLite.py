@@ -63,13 +63,13 @@ command_select = (
     + CaselessLiteral("FROM")
     + name("table1_name")
     + Optional(
-        CaselessLiteral("LEFT_JOIN")("left_join")
+        CaselessLiteral("LEFT_JOIN")
         + name("table2_name")
         + CaselessLiteral("ON")
         + name("t1_column")
         + "="
         + name("t2_column")
-    )
+    )("left_join")
     + Optional(CaselessLiteral("WHERE") + condition)
     + ";"
 )
@@ -219,109 +219,192 @@ while cmdfile != ".EXIT":
                         "Command is wrond\n" + pe + "\nСolumn: {}".format(pe.column)
                     )
                 else:
-                    if parsed.left_join != None:
-                        Database.selectLeftJoinOnCond(
-                            parsed.table1_name,
-                            parsed.table2_name,
-                            parsed.select_colum_names,
-                            parsed.condition_column_name,
-                            parsed.t1_column,
-                            parsed.t2_column,
-                            equal,
-                            parsed.value
+                    c = False
+                    for b in parsed:
+                        if b.lower() == "where":
+                            c = True
+                    if (
+                        parsed[1] == "*" and c == True and parsed.left_join == ""
+                    ):  # c == True -- есть условие  c != True -- условия нет
+                        print(
+                            'All rows has been selected from table "'
+                            + parsed.table1_name
+                            + '"'
                         )
-                    else:
-                        c = False
-                        for b in parsed:
-                            if b.lower() == "where":
-                                c = True
-                        if (
-                            parsed[1] == "*" and c == True
-                        ):  # c == True -- есть условие  c != True -- условия нет
-                            print(
-                                'All rows has been selected from table "'
-                                + parsed.table1_name
-                                + '"'
-                            )
-                            str = rightcond(
-                                parsed.condition_column_name,
-                                parsed.value,
-                                Database,
-                                parsed.table1_name,
-                            )
-                            if str != None:
-                                if str[0] == parsed.condition_column_name:
-                                    Database.selectOnCond(
-                                        parsed.table1_name,
-                                        "*",
-                                        str[0],
-                                        str[1],
-                                        whatcond(parsed.operator, True),
-                                    )
-                                else:
-                                    Database.selectOnCond(
-                                        parsed.table1_name,
-                                        "*",
-                                        str[0],
-                                        str[1],
-                                        whatcond(parsed.operator, False),
-                                    )
-                                print("Selected rows satisfying following condition:")
-                                a = ""
-                                for i in parsed.condition:
-                                    a = a + i
-                                print(a)
-                        elif parsed[1] == "*" and c != True:
-                            Database.selectNoCond(parsed.table1_name, "*")
-                            print(
-                                'All rows has been selected from table "'
-                                + parsed.table1_name
-                                + '"'
-                            )
-                        elif parsed[1] != "*" and c == True:
-                            str = rightcond(
-                                parsed.condition_column_name,
-                                parsed.value,
-                                Database,
-                                parsed.table1_name,
-                            )
-                            if str != None:
-                                if str[0] == parsed.condition_column_name:
-                                    Database.selectOnCond(
-                                        parsed.table1_name,
-                                        parsed.select_colum_names,
-                                        str[0],
-                                        str[1],
-                                        whatcond(parsed.operator, True),
-                                    )
-                                else:
-                                    Database.selectOnCond(
-                                        parsed.table1_name,
-                                        parsed.select_colum_names,
-                                        str[0],
-                                        str[1],
-                                        whatcond(parsed.operator, False),
-                                    )
-                                print(
-                                    'Rows has been selected from "'
-                                    + parsed.table1_name
-                                    + '":'
+                        str = rightcond(
+                            parsed.condition_column_name,
+                            parsed.value,
+                            Database,
+                            parsed.table1_name,
+                        )
+                        if str != None:
+                            if str[0] == parsed.condition_column_name:
+                                Database.selectOnCond(
+                                    parsed.table1_name,
+                                    "*",
+                                    str[0],
+                                    str[1],
+                                    whatcond(parsed.operator, True),
                                 )
-                                print("Selected rows satisfying following condition:")
-                                a = ""
-                                for i in parsed.condition:
-                                    a = a + i
-                                    a = a + " "
-                                print(a)
-                        elif parsed[1] != "*" and c != True:
-                            Database.selectNoCond(
-                                parsed.table1_name, parsed.select_colum_names
-                            )
+                            else:
+                                Database.selectOnCond(
+                                    parsed.table1_name,
+                                    "*",
+                                    str[0],
+                                    str[1],
+                                    whatcond(parsed.operator, False),
+                                )
+                            print("Selected rows satisfying following condition:")
+                            a = ""
+                            for i in parsed.condition:
+                                a = a + i
+                            print(a)
+                    elif parsed[1] == "*" and c != True and parsed.left_join == "":
+                        Database.selectNoCond(parsed.table1_name, "*")
+                        print(
+                            'All rows has been selected from table "'
+                            + parsed.table1_name
+                            + '"'
+                        )
+                    elif parsed[1] != "*" and c == True and parsed.left_join == "":
+                        str = rightcond(
+                            parsed.condition_column_name,
+                            parsed.value,
+                            Database,
+                            parsed.table1_name,
+                        )
+                        if str != None:
+                            if str[0] == parsed.condition_column_name:
+                                Database.selectOnCond(
+                                    parsed.table1_name,
+                                    parsed.select_colum_names,
+                                    str[0],
+                                    str[1],
+                                    whatcond(parsed.operator, True),
+                                )
+                            else:
+                                Database.selectOnCond(
+                                    parsed.table1_name,
+                                    parsed.select_colum_names,
+                                    str[0],
+                                    str[1],
+                                    whatcond(parsed.operator, False),
+                                )
                             print(
                                 'Rows has been selected from "'
                                 + parsed.table1_name
                                 + '":'
                             )
+                            print("Selected rows satisfying following condition:")
+                            a = ""
+                            for i in parsed.condition:
+                                a = a + i
+                                a = a + " "
+                            print(a)
+                    elif parsed[1] != "*" and c != True and parsed.left_join == "":
+                        Database.selectLeftJoinNoCond(
+                            parsed.table1_name, parsed.select_colum_names
+                        )
+                        print(
+                            'Rows has been selected from "' + parsed.table1_name + '":'
+                        )
+                    elif parsed[1] == "*" and c != True and parsed.left_join != "":
+                        Database.selectLeftJoinNoCond(
+                            parsed.table1_name, parsed.table2_name, "*", parsed.t1_column, parsed.t2_column,
+                        )
+                        print(
+                            'All rows has been selected from table "'
+                            + parsed.table1_name
+                            + '"'
+                        )
+                    elif parsed[1] != "*" and c == True and parsed.left_join != "":
+                        str = rightcond(
+                            parsed.condition_column_name,
+                            parsed.value,
+                            Database,
+                            parsed.table1_name,
+                        )
+                        if str != None:
+                            if str[0] == parsed.condition_column_name:
+                                Database.selectLeftJoinOnCond(
+                                    parsed.table1_name,
+                                    parsed.table2_name,
+                                    parsed.select_colum_names,
+                                    str[0],  # col to analyze
+                                    parsed.t1_column,
+                                    parsed.t2_column,
+                                    whatcond(parsed.operator, True),
+                                    str[1],  # condval
+                                )
+                            else:
+                                Database.selectLeftJoinOnCond(
+                                    parsed.table1_name,
+                                    parsed.table2_name,
+                                    parsed.select_colum_names,
+                                    str[0],
+                                    parsed.t1_column,
+                                    parsed.t2_column,
+                                    whatcond(parsed.operator, False),
+                                    str[1],
+                                )
+                            print(
+                                'Rows has been selected from "'
+                                + parsed.table1_name
+                                + '":'
+                            )
+                            print("Selected rows satisfying following condition:")
+                            a = ""
+                            for i in parsed.condition:
+                                a = a + i
+                                a = a + " "
+                            print(a)
+                    elif parsed[1] != "*" and c != True and parsed.left_join != "":
+                        Database.selectLeftJoinNoCond(
+                            parsed.table1_name, parsed.table2_name, parsed.select_colum_names, parsed.t1_column, parsed.t2_column,
+                        )
+                        print(
+                            'Rows has been selected from "' + parsed.table1_name + '":'
+                        )
+                    elif parsed[1] == "*" and c == True and parsed.left_join != "":
+                        print(
+                            'All rows has been selected from table "'
+                            + parsed.table1_name
+                            + '"'
+                        )
+                        str = rightcond(
+                            parsed.condition_column_name,
+                            parsed.value,
+                            Database,
+                            parsed.table1_name,
+                        )
+                        if str != None:
+                            if str[0] == parsed.condition_column_name:
+                                Database.selectLeftJoinOnCond(
+                                    parsed.table1_name,
+                                    parsed.table2_name,
+                                    "*",
+                                    str[0],
+                                    parsed.t1_column,
+                                    parsed.t2_column,
+                                    whatcond(parsed.operator, True),
+                                    str[1],
+                                )
+                            else:
+                                Database.selectLeftJoinOnCond(
+                                    parsed.table1_name,
+                                    parsed.table2_name,
+                                    "*",
+                                    str[0],
+                                    parsed.t1_column,
+                                    parsed.t2_column,
+                                    whatcond(parsed.operator, False),
+                                    str[1],
+                                )
+                            print("Selected rows satisfying following condition:")
+                            a = ""
+                            for i in parsed.condition:
+                                a = a + i
+                            print(a)
             if cmdtype == "delete":
                 try:
                     parsed = command_delete.parseString(cmd)

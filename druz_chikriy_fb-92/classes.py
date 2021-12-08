@@ -38,7 +38,7 @@ class column:
         self.elements = []
 
     def addElement(self, el):
-        print("Adding", el, "to", self.columnName)
+        # print("Adding", el, "to", self.columnName)
         self.elements.append(el)
 
     def deleteElementByValue(self, val):
@@ -241,7 +241,8 @@ class DB:
         condition,
         condVal,
     ):
-        print(tabName1, tabName2, colToPrint, colToAnal, colToJoin1, colToJoin2)
+        # print("selecting left join")
+        # print(tabName1, tabName2, colToPrint, colToAnal, colToJoin1, colToJoin2)
         table1Index = -1
         i = 0
         while i < len(self.tables):
@@ -282,13 +283,248 @@ class DB:
         if colToJoin2Index == -1:
             printError("Column to join 2 not found")
             return False
-        print("Indexes found")
+        # print("Indexes found")
         columns = []
-        for name in colToPrint:
-            columns.append(column(name, False))
+        if colToPrint == "*":
+            i = 0
+            while i < len(self.tables[table1Index].columns):
+                # if self.tables[table1Index].columns[i].columnName == name:
+                columns.append(column(self.tables[table1Index].columns[i].columnName, False))
+                i += 1
+            i = 0
+            while i < len(self.tables[table2Index].columns):
+                # if self.tables[table1Index].columns[i].columnName == name:
+                columns.append(column(self.tables[table2Index].columns[i].columnName, False))
+                i += 1
+        else:
+            for name in colToPrint:
+                i = 0
+                while i < len(self.tables[table1Index].columns):
+                    if self.tables[table1Index].columns[i].columnName == name:
+                        columns.append(column(name, False))
+                    i += 1
+            for name in colToPrint:
+                i = 0
+                while i < len(self.tables[table2Index].columns):
+                    if (
+                        self.tables[table2Index].columns[i].columnName == name
+                        and i != colToJoin1Index
+                    ):
+                        columns.append(column(name, False))
+                    i += 1
         self.createTable("LEFT_JOIN TMPTABLE", columns)
-        self.selectNoCond("LEFT_JOIN TMPTABLE", "*")
+        # print("bp1")
+        # self.selectNoCond("LEFT_JOIN TMPTABLE", "*")
+        # print("bp2")
         # 2 цикла сюда
+        columnsToPrint1Indexes = []
+        columnsToPrint2Indexes = []
+        if colToPrint == "*":
+            for ind in range(0, len(self.tables[table1Index].columns)):
+                columnsToPrint1Indexes.append(ind)
+            for ind in range(0, len(self.tables[table2Index].columns)):
+                # if ind != colToJoin2Index:
+                columnsToPrint2Indexes.append(ind)
+        else:
+            for name in colToPrint:
+                i = 0
+                while i < len(self.tables[table1Index].columns):
+                    if self.tables[table1Index].columns[i].columnName == name:
+                        columnsToPrint1Indexes.append(i)
+                    i += 1
+            for name in colToPrint:
+                i = 0
+                while i < len(self.tables[table2Index].columns):
+                    if (
+                        self.tables[table2Index].columns[i].columnName == name
+                        # and i != colToJoin2Index
+                    ):
+                        columnsToPrint2Indexes.append(i)
+                    i += 1
+        valueIndexs = []
+        i = 0
+        while i < len(self.tables[table1Index].columns[colToJoin1Index].elements):
+            j = 0
+            while j < len(self.tables[table2Index].columns[colToJoin2Index].elements):
+                if (
+                    self.tables[table1Index].columns[colToJoin1Index].elements[i]
+                    == self.tables[table2Index].columns[colToJoin2Index].elements[j]
+                ):
+                    valueIndexs.append((i, j))
+                j += 1
+            i += 1
+        j = 0
+        # print("Values:",valueIndexs)
+        # print("col 1", columnsToPrint1Indexes)
+        # print("col 2", columnsToPrint2Indexes)
+        if True:
+            while j < len(valueIndexs):
+                values = []
+                for i in columnsToPrint1Indexes:
+                    values.append(
+                        self.tables[table1Index].columns[i].elements[valueIndexs[j][0]]
+                    )
+                for i in columnsToPrint2Indexes:
+                    values.append(
+                        self.tables[table2Index].columns[i].elements[valueIndexs[j][1]]
+                    )
+                # 
+                self.insertInTable("LEFT_JOIN TMPTABLE", values)
+                j += 1
+
+        # print("TMPTABLE filled")
+        # print(self.tables[-1])
+        # print(
+        #     self.tables[-1].columns[0].columnName, self.tables[-1].columns[1].columnName
+        # )
+        self.selectOnCond("LEFT_JOIN TMPTABLE", "*", colToAnal, condVal, condition)
+        self.deleteTable("LEFT_JOIN TMPTABLE")
+
+    def selectLeftJoinNoCond(
+        self,
+        tabName1,
+        tabName2,
+        colToPrint,
+        colToJoin1,
+        colToJoin2,
+    ):
+        # print("selecting left join")
+        # print(tabName1, tabName2, colToPrint, colToAnal, colToJoin1, colToJoin2)
+        table1Index = -1
+        i = 0
+        while i < len(self.tables):
+            if self.tables[i].tableName == tabName1:
+                table1Index = i
+                break
+            i += 1
+        if table1Index == -1:
+            printError("Table 1 not found")
+            return False
+        table2Index = -1
+        i = 0
+        while i < len(self.tables):
+            if self.tables[i].tableName == tabName2:
+                table2Index = i
+                break
+            i += 1
+        if table2Index == -1:
+            printError("Table 2 not found")
+            return False
+        colToJoin1Index = -1
+        i = 0
+        while i < len(self.tables[table1Index].columns):
+            if self.tables[table1Index].columns[i].columnName == colToJoin1:
+                colToJoin1Index = i
+                break
+            i += 1
+        if colToJoin1Index == -1:
+            printError("Column to join 1 not found")
+            return False
+        colToJoin2Index = -1
+        i = 0
+        while i < len(self.tables[table2Index].columns):
+            if self.tables[table2Index].columns[i].columnName == colToJoin2:
+                colToJoin2Index = i
+                break
+            i += 1
+        if colToJoin2Index == -1:
+            printError("Column to join 2 not found")
+            return False
+        # print("Indexes found")
+        columns = []
+        if colToPrint == "*":
+            i = 0
+            while i < len(self.tables[table1Index].columns):
+                # if self.tables[table1Index].columns[i].columnName == name:
+                columns.append(column(self.tables[table1Index].columns[i].columnName, False))
+                i += 1
+            i = 0
+            while i < len(self.tables[table2Index].columns):
+                # if self.tables[table1Index].columns[i].columnName == name:
+                columns.append(column(self.tables[table2Index].columns[i].columnName, False))
+                i += 1
+        else:
+            for name in colToPrint:
+                i = 0
+                while i < len(self.tables[table1Index].columns):
+                    if self.tables[table1Index].columns[i].columnName == name:
+                        columns.append(column(name, False))
+                    i += 1
+            for name in colToPrint:
+                i = 0
+                while i < len(self.tables[table2Index].columns):
+                    if (
+                        self.tables[table2Index].columns[i].columnName == name
+                        and i != colToJoin1Index
+                    ):
+                        columns.append(column(name, False))
+                    i += 1
+        self.createTable("LEFT_JOIN TMPTABLE", columns)
+        # print("bp1")
+        # self.selectNoCond("LEFT_JOIN TMPTABLE", "*")
+        # print("bp2")
+        # 2 цикла сюда
+        columnsToPrint1Indexes = []
+        columnsToPrint2Indexes = []
+        if colToPrint == "*":
+            for ind in range(0, len(self.tables[table1Index].columns)):
+                columnsToPrint1Indexes.append(ind)
+            for ind in range(0, len(self.tables[table2Index].columns)):
+                # if ind != colToJoin2Index:
+                columnsToPrint2Indexes.append(ind)
+        else:
+            for name in colToPrint:
+                i = 0
+                while i < len(self.tables[table1Index].columns):
+                    if self.tables[table1Index].columns[i].columnName == name:
+                        columnsToPrint1Indexes.append(i)
+                    i += 1
+            for name in colToPrint:
+                i = 0
+                while i < len(self.tables[table2Index].columns):
+                    if (
+                        self.tables[table2Index].columns[i].columnName == name
+                        # and i != colToJoin2Index
+                    ):
+                        columnsToPrint2Indexes.append(i)
+                    i += 1
+        valueIndexs = []
+        i = 0
+        while i < len(self.tables[table1Index].columns[colToJoin1Index].elements):
+            j = 0
+            while j < len(self.tables[table2Index].columns[colToJoin2Index].elements):
+                if (
+                    self.tables[table1Index].columns[colToJoin1Index].elements[i]
+                    == self.tables[table2Index].columns[colToJoin2Index].elements[j]
+                ):
+                    valueIndexs.append((i, j))
+                j += 1
+            i += 1
+        j = 0
+        # print("Values:",valueIndexs)
+        # print("col 1", columnsToPrint1Indexes)
+        # print("col 2", columnsToPrint2Indexes)
+        if True:
+            while j < len(valueIndexs):
+                values = []
+                for i in columnsToPrint1Indexes:
+                    values.append(
+                        self.tables[table1Index].columns[i].elements[valueIndexs[j][0]]
+                    )
+                for i in columnsToPrint2Indexes:
+                    values.append(
+                        self.tables[table2Index].columns[i].elements[valueIndexs[j][1]]
+                    )
+                
+                self.insertInTable("LEFT_JOIN TMPTABLE", values)
+                j += 1
+
+        # print("TMPTABLE filled")
+        # print(self.tables[-1])
+        # print(
+        #     self.tables[-1].columns[0].columnName, self.tables[-1].columns[1].columnName
+        # )
+        self.selectNoCond("LEFT_JOIN TMPTABLE", "*")
         self.deleteTable("LEFT_JOIN TMPTABLE")
 
     def clearTable(self, tabName):
@@ -343,38 +579,38 @@ class DB:
 
 def rightcond(param1, param2, database, table):
     strToReturn = []
-    tableIndex = 0
-    i = 0
-    while i < len(database.tables):
-        if database.tables[i].tableName == table:
-            tableIndex = i
-            break
-        i += 1
-    if tableIndex == -1:
-        printError("Table not found")
-        return
-    i = 0
-    columnIndex = -1
-    while i < len(database.tables[tableIndex].columns):
-        if database.tables[tableIndex].columns[i].columnName == param1:
-            columnIndex = i
-            break
-        i += 1
-    if columnIndex == -1:
-        i = 0
-        while i < len(database.tables[tableIndex].columns):
-            if database.tables[tableIndex].columns[i].columnName == param2:
-                columnIndex = i
-                break
-            i += 1
-        if columnIndex == -1:
-            printError("Column not found")
-            return
-        strToReturn.append(param2)
-        strToReturn.append(param1)
-    else:
-        strToReturn.append(param1)
-        strToReturn.append(param2)
+    # tableIndex = 0
+    # i = 0
+    # while i < len(database.tables):
+    #     if database.tables[i].tableName == table:
+    #         tableIndex = i
+    #         break
+    #     i += 1
+    # if tableIndex == -1:
+    #     printError("Table not found")
+    #     return
+    # i = 0
+    # columnIndex = -1
+    # while i < len(database.tables[tableIndex].columns):
+    #     if database.tables[tableIndex].columns[i].columnName == param1:
+    #         columnIndex = i
+    #         break
+    #     i += 1
+    # if columnIndex == -1:
+    #     i = 0
+    #     while i < len(database.tables[tableIndex].columns):
+    #         if database.tables[tableIndex].columns[i].columnName == param2:
+    #             columnIndex = i
+    #             break
+    #         i += 1
+    #     if columnIndex == -1:
+    #         printError("Column not found")
+    #         return
+    #     strToReturn.append(param2)
+    #     strToReturn.append(param1)
+    # else:
+    strToReturn.append(param1)
+    strToReturn.append(param2)
     return strToReturn
 
 
