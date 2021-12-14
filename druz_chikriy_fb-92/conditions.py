@@ -4,42 +4,25 @@ from classes import printError
 
 
 def equal(a, b):
-    if a == b:
-        return True
-    else:
-        return False
+    return a == b
 
 
 def notequal(a, b):
-    if a != b:
-        return True
-    else:
-        return False
+    return a != b
 
 
 def more(a, b):
-    if a > b:
-        return True
-    else:
-        return False
+    return a > b
 
 
 def less(a, b):
-    if a < b:
-        return True
-    else:
-        return False
+    return a < b
 
 
 def moreorequal(a, b):
-    if a >= b:
-        return True
-    else:
-        return False
+    # print(a, b, a >= b)
+    return a >= b
 
 
 def lessorequal(a, b):
-    if a <= b:
-        return True
-    else:
-        return False
+    return a <= b

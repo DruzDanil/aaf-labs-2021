@@ -12,3 +12,5 @@ SELECT owner_name, cat_name FROM owners LEFT_JOIN cats ON owner_id = cat_owner_i
 DELETE FROM cats;
 DELETE cats WHERE cat_name = "Murzik";
 DELETE cats ;
+SELECT * FROM owners WHERE owner_name = "Vasya";
+SELECT * FROM owners WHERE owner_id != owner_age;
