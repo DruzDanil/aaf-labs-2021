@@ -34,7 +34,96 @@ except Exception:
     )
     exit()
 
-
+class Node:
+    def __init__(self, data, key):
+        self.left = None
+        self.right = None
+        self.data = data
+        self.key = key
+    def insert(self, data, key):
+        if self.data:
+            if data < self.data:
+                if self.left is None:
+                    self.left = Node(data, key)
+                else:
+                    self.left.insert(data, key)
+            elif data > self.data:
+                if self.right is None:
+                    self.right = Node(data, key)
+                else:
+                    self.right.insert(data, key)
+            else:
+                if self.left is None:
+                    self.left = Node(data, key)
+                else:
+                    self.left.insert(data, key)
+                if self.right is None:
+                    self.right = Node(data, key)
+                else:
+                    self.right.insert(data, key)
+        else:
+            self.data = data
+    def findval(self, lkpval):
+        if lkpval < self.data:
+            if self.left is None:
+                return str(lkpval)+" Not Found"
+            return self.left.findval(lkpval)
+        elif lkpval > self.data:
+            if self.right is None:
+                return str(lkpval)+" Not Found"
+            return self.right.findval(lkpval)
+        else:
+            return self.key
+    def PrintTree(self):
+        if self.left:
+            self.left.PrintTree()
+        print( self.data),
+        if self.right:
+            self.right.PrintTree()
+    def findvalOnCond(self, data, condition, operator):
+        res = []
+        # print(operator)
+        if operator == "<=" or operator == "=<" or operator == "=" or operator == "<":
+            if condition(self.data, data) or self.data == data:
+                if condition(self.data, data):
+                    res.append(self.key)
+                # print(res)
+                if self.left is None and self.right is None:
+                    return res
+                if self.left != None:
+                    res = res + self.left.findvalOnCond(data, condition, operator)
+                if self.right != None:
+                    res = res + self.right.findvalOnCond(data, condition, operator)
+            else:
+                if self.right is None:
+                    return res
+                res = res + self.right.findvalOnCond(data, condition, operator)
+        elif operator == "!=":
+            if condition(self.data, data):
+                res.append(self.key)  
+            if self.left is None and self.right is None:
+                return res
+            if self.left != None:
+                res = res + self.left.findvalOnCond(data, condition, operator)
+            if self.right != None:
+                res = res + self.right.findvalOnCond(data, condition, operator)
+            pass
+        else:
+            if condition(self.data, data) or self.data == data:
+                if condition(self.data, data):
+                    res.append(self.key)
+                if self.left is None and self.right is None:
+                    return res
+                if self.right != None:
+                    res = res + self.right.findvalOnCond(data, condition, operator)
+                if self.left != None:
+                    res = res + self.left.findvalOnCond(data, condition, operator)
+            else:
+                if self.left is None:
+                    return res
+                res = res + self.left.findvalOnCond(data, condition, operator)
+        # print(res)
+        return res
 class column:
     def __init__(self, name, indexed):
         self.indexed = indexed
@@ -126,6 +215,7 @@ class DB:
         columnToAnal,
         condValue,
         condition,
+        operator,
         isColumn=False,
     ):
         tableIndex = -1
@@ -167,12 +257,18 @@ class DB:
             printString += " " + self.tables[tableIndex].columns[index].columnName
         printString += "\n"
         if isColumn == False:
+            i=1
+            root = Node(self.tables[tableIndex].columns[columnIndex].elements[0], 0)
             while i < len(self.tables[tableIndex].columns[columnIndex].elements):
-                if condition(
-                    self.tables[tableIndex].columns[columnIndex].elements[i], condValue
-                ):
-                    valsIndexes.append(i)
+                # if condition(
+                #     self.tables[tableIndex].columns[columnIndex].elements[i], condValue
+                # ):
+                #     valsIndexes.append(i)
+                root.insert(self.tables[tableIndex].columns[columnIndex].elements[i], i)
                 i += 1
+            # root.PrintTree()
+            valsIndexes = root.findvalOnCond(condValue, condition, operator)
+            # print(valsIndexes)
         else:
             i = 0
             column2Index = -1
@@ -268,6 +364,7 @@ class DB:
         colToJoin2,
         condition,
         condVal,
+        operator,
         isColum=False
     ):
         print("selecting left join on cond")
@@ -419,7 +516,7 @@ class DB:
         # print(
         #     self.tables[-1].columns[0].columnName, self.tables[-1].columns[1].columnName
         # )
-        self.selectOnCond("LEFT_JOIN TMPTABLE", "*", colToAnal, condVal, condition, isColumn = isColum)
+        self.selectOnCond("LEFT_JOIN TMPTABLE", "*", colToAnal, condVal, condition, operator, isColumn = isColum)
         self.deleteTable("LEFT_JOIN TMPTABLE")
 
     def selectLeftJoinNoCond(

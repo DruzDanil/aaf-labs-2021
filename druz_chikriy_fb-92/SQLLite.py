@@ -13,7 +13,7 @@ def isKeywordToStart(word):
 
 
 def whatcond(cond, mod):
-    print(mod, cond)
+    # print(mod, cond)
     if mod:
         return {
             cond == "=": equal,
@@ -250,9 +250,10 @@ while cmdfile != ".EXIT":
                                     str[0],
                                     str[1],
                                     whatcond(parsed.operator, True),
-                                    isColumn=str[2],
+                                    parsed.operator,
+                                    isColumn=str[2],                                    
                                 )
-                                print(str[2])
+                                # print(str[2])
                             else:
                                 Database.selectOnCond(
                                     parsed.table1_name,
@@ -260,12 +261,13 @@ while cmdfile != ".EXIT":
                                     str[0],
                                     str[1],
                                     whatcond(parsed.operator, False),
-                                    isColumn=str[2],
+                                    parsed.operator,
+                                    isColumn=str[2],                                    
                                 )
                             print("Selected rows satisfying following condition:")
                             a = ""
                             for i in parsed.condition:
-                                a = a + i
+                                a = a + " " + i
                             print(a)
                     elif parsed[1] == "*" and c != True and parsed.left_join == "":
                         Database.selectNoCond(parsed.table1_name, "*")
@@ -290,7 +292,8 @@ while cmdfile != ".EXIT":
                                     str[0],
                                     str[1],
                                     whatcond(parsed.operator, True),
-                                    str[2]
+                                    parsed.operator,
+                                    isColumn=str[2],
                                 )
                             else:
                                 Database.selectOnCond(
@@ -299,7 +302,8 @@ while cmdfile != ".EXIT":
                                     str[0],
                                     str[1],
                                     whatcond(parsed.operator, False),
-                                    str[2]
+                                    parsed.operator,
+                                    isColumn=str[2],
                                 )
                             print(
                                 'Rows has been selected from "'
@@ -351,7 +355,8 @@ while cmdfile != ".EXIT":
                                     parsed.t2_column,
                                     whatcond(parsed.operator, True),
                                     str[1],  # condval
-                                    isColum=str[2]
+                                    parsed.operator,
+                                    isColumn=str[2],
                                 )
                             else:
                                 Database.selectLeftJoinOnCond(
@@ -363,7 +368,8 @@ while cmdfile != ".EXIT":
                                     parsed.t2_column,
                                     whatcond(parsed.operator, False),
                                     str[1],
-                                    isColum=str[2]
+                                    parsed.operator,
+                                    isColumn=str[2],
                                 )
                             print(
                                 'Rows has been selected from "'
@@ -411,7 +417,8 @@ while cmdfile != ".EXIT":
                                     parsed.t2_column,
                                     whatcond(parsed.operator, True),
                                     str[1],
-                                    isColum=str[2]
+                                    parsed.operator,
+                                    isColumn=str[2],
                                 )
                             else:
                                 Database.selectLeftJoinOnCond(
@@ -423,7 +430,8 @@ while cmdfile != ".EXIT":
                                     parsed.t2_column,
                                     whatcond(parsed.operator, False),
                                     str[1],
-                                    isColum=str[2]
+                                    parsed.operator,
+                                    isColumn=str[2],
                                 )
                             print("Selected rows satisfying following condition:")
                             a = ""
