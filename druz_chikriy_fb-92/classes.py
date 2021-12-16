@@ -442,6 +442,7 @@ class DB:
                     ):
                         columns.append(column(name, False))
                     i += 1
+        # print(columns)
         self.createTable("LEFT_JOIN TMPTABLE", columns)
         # print("bp1")
         # self.selectNoCond("LEFT_JOIN TMPTABLE", "*")
@@ -482,6 +483,8 @@ class DB:
                     == self.tables[table2Index].columns[colToJoin2Index].elements[j]
                 ):
                     valueIndexs.append((i, j))
+                elif len(valueIndexs) == 0:
+                    valueIndexs.append((i, -1))
                 elif valueIndexs[-1][0] != i:
                     valueIndexs.append((i, -1))
                 j += 1
@@ -528,7 +531,7 @@ class DB:
         colToJoin2,
     ):
         # print("selecting left join")
-        # print(tabName1, tabName2, colToPrint, colToAnal, colToJoin1, colToJoin2)
+        # print(tabName1, tabName2, colToPrint, colToJoin1, colToJoin2)
         table1Index = -1
         i = 0
         while i < len(self.tables):
@@ -569,6 +572,8 @@ class DB:
         if colToJoin2Index == -1:
             printError("Column to join 2 not found")
             return False
+        # print(colToJoin1Index)
+        # print(colToJoin2Index)
         # print("Indexes found")
         columns = []
         if colToPrint == "*":
@@ -602,6 +607,7 @@ class DB:
                     ):
                         columns.append(column(name, False))
                     i += 1
+        # print(columns)
         self.createTable("LEFT_JOIN TMPTABLE", columns)
         # print("bp1")
         # self.selectNoCond("LEFT_JOIN TMPTABLE", "*")
@@ -632,16 +638,25 @@ class DB:
                     ):
                         columnsToPrint2Indexes.append(i)
                     i += 1
+        # print(columnsToPrint1Indexes)
+        # print(columnsToPrint2Indexes)
+        # print(table1Index)
+        # print(table2Index)
         valueIndexs = []
         i = 0
         while i < len(self.tables[table1Index].columns[colToJoin1Index].elements):
             j = 0
             while j < len(self.tables[table2Index].columns[colToJoin2Index].elements):
+                # print(self.tables[table1Index].columns[colToJoin1Index].elements[i], self.tables[table2Index].columns[colToJoin2Index].elements[j])
                 if (
                     self.tables[table1Index].columns[colToJoin1Index].elements[i]
                     == self.tables[table2Index].columns[colToJoin2Index].elements[j]
                 ):
+                    # print("Values:",valueIndexs)
                     valueIndexs.append((i, j))
+                    # print("Values:",valueIndexs)
+                elif len(valueIndexs) == 0:
+                    valueIndexs.append((i, -1))
                 elif valueIndexs[-1][0] != i:
                     valueIndexs.append((i, -1))
                 j += 1
