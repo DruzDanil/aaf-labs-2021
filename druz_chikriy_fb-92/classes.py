@@ -1,3 +1,6 @@
+from conditions import *
+
+
 def printError(error):
     print(colored("Error:", "red"), error)
 
@@ -34,111 +37,169 @@ except Exception:
     )
     exit()
 
-class Node:
+
+class TreeNode:
     def __init__(self, data, key):
         self.left = None
         self.right = None
         self.data = data
         self.key = key
+
     def insert(self, data, key):
         if self.data:
             if data < self.data:
                 if self.left is None:
-                    self.left = Node(data, key)
+                    self.left = TreeNode(data, key)
                 else:
                     self.left.insert(data, key)
-            elif data > self.data:
+            elif data >= self.data:
                 if self.right is None:
-                    self.right = Node(data, key)
+                    self.right = TreeNode(data, key)
                 else:
                     self.right.insert(data, key)
-            else:
-                if self.left is None:
-                    self.left = Node(data, key)
-                else:
-                    self.left.insert(data, key)
-                if self.right is None:
-                    self.right = Node(data, key)
-                else:
-                    self.right.insert(data, key)
+            # else:
+            #     if self.left is None:
+            #         self.left = TreeNode(data, key)
+            #     else:
+            #         self.left.insert(data, key)
+            #     if self.right is None:
+            #         self.right = TreeNode(data, key)
+            #     else:
+            #         self.right.insert(data, key)
         else:
             self.data = data
+            self.key = key
+
     def findval(self, lkpval):
         if lkpval < self.data:
             if self.left is None:
-                return str(lkpval)+" Not Found"
+                return str(lkpval) + " Not Found"
             return self.left.findval(lkpval)
         elif lkpval > self.data:
             if self.right is None:
-                return str(lkpval)+" Not Found"
+                return str(lkpval) + " Not Found"
             return self.right.findval(lkpval)
         else:
             return self.key
+
     def PrintTree(self):
         if self.left:
             self.left.PrintTree()
-        print( self.data),
+        print(self.data),
         if self.right:
             self.right.PrintTree()
+
     def findvalOnCond(self, data, condition, operator):
         res = []
         # print(operator)
-        if operator == "<=" or operator == "=<" or operator == "=" or operator == "<":
-            if condition(self.data, data) or self.data == data:
+        if self.data != "":
+            if operator == "<=" or operator == "=<":
+                res = res + self.findvalOnCond(data, equal, "=")
+                # print("End")
+                res = res + self.findvalOnCond(data, less, "<")
+                
+            elif operator == "!=":
                 if condition(self.data, data):
                     res.append(self.key)
-                # print(res)
                 if self.left is None and self.right is None:
                     return res
                 if self.left != None:
                     res = res + self.left.findvalOnCond(data, condition, operator)
                 if self.right != None:
                     res = res + self.right.findvalOnCond(data, condition, operator)
-            else:
-                if self.right is None:
-                    return res
-                res = res + self.right.findvalOnCond(data, condition, operator)
-        elif operator == "!=":
-            if condition(self.data, data):
-                res.append(self.key)  
-            if self.left is None and self.right is None:
-                return res
-            if self.left != None:
-                res = res + self.left.findvalOnCond(data, condition, operator)
-            if self.right != None:
-                res = res + self.right.findvalOnCond(data, condition, operator)
-            pass
-        else:
-            if condition(self.data, data) or self.data == data:
+                pass
+            elif  operator == "=":
+                if self.data == data:
+                    res.append(self.key)
+                    if self.right is None:
+                        return res
+                    else:
+                        res = res + self.right.findvalOnCond(data, condition, operator)
+                elif self.data > data:
+                    if self.left is None:
+                        return res
+                    else:
+                        res = res + self.left.findvalOnCond(data, condition, operator)
+                elif self.data < data:
+                    if self.right is None:
+                        return res
+                    else:
+                        res = res + self.right.findvalOnCond(data, condition, operator)
+                pass
+            elif operator == "<":
                 if condition(self.data, data):
                     res.append(self.key)
-                if self.left is None and self.right is None:
-                    return res
-                if self.right != None:
-                    res = res + self.right.findvalOnCond(data, condition, operator)
-                if self.left != None:
+                    # print(res)
+                    if self.left is None and self.right is None:
+                        return res
+                    if self.left != None:
+                        res = res + self.left.findvalOnCond(data, condition, operator)
+                    if self.right != None:
+                        res = res + self.right.findvalOnCond(data, condition, operator)
+                else:
+                    if self.left is None:
+                        return res
                     res = res + self.left.findvalOnCond(data, condition, operator)
+            elif operator == ">=" or operator == "=>":
+                res = res + self.findvalOnCond(data, equal, "=")
+                res = res + self.findvalOnCond(data, more, ">")
             else:
-                if self.left is None:
-                    return res
-                res = res + self.left.findvalOnCond(data, condition, operator)
+                if condition(self.data, data) or self.data == data:
+                    if condition(self.data, data):
+                        res.append(self.key)
+                    if self.left is None and self.right is None:
+                        return res
+                    if self.right != None:
+                        res = res + self.right.findvalOnCond(data, condition, operator)
+                    if self.left != None:
+                        res = res + self.left.findvalOnCond(data, condition, operator)
+                else:
+                    if self.left is None:
+                        return res
+                    res = res + self.left.findvalOnCond(data, condition, operator)
         # print(res)
         return res
+    
+    def delTree(self):
+        if self.left:
+            self.left.delTree()
+        if self.right:
+            self.right.delTree()
+        self.data = None
+        self.left = None
+        self.right = None
+        # print("Tree cleaned")
+    
+
 class column:
     def __init__(self, name, indexed):
+        # print("Creating column")
         self.indexed = indexed
         self.columnName = name
         self.elements = []
-
+        # self.tree = None
+        if indexed:
+            self.tree = TreeNode(False, 0)
+        # print("Created column")
     def addElement(self, el):
         # print("Adding", el, "to", self.columnName)
         self.elements.append(el)
-
+        if self.indexed:
+            self.tree.insert(el, len(self.elements)-1)
     def deleteElementByValue(self, val):
+        # print("Elem deleted")
         self.elements.remove(val)
+        if self.indexed:        
+            self.tree.delTree()
+            i = 0
+            while i < len(self.elements):
+                self.tree.insert(self.elements[i], i)
+                i += 1
+
 
     def deleteElementByIndex(self, index):
         self.elements.pop(index)
+
 
     def deleteAllElements(self):
         self.elements = []
@@ -218,6 +279,7 @@ class DB:
         operator,
         isColumn=False,
     ):
+        # print("Selecting in...")
         tableIndex = -1
         i = 0
         while i < len(self.tables):
@@ -257,17 +319,20 @@ class DB:
             printString += " " + self.tables[tableIndex].columns[index].columnName
         printString += "\n"
         if isColumn == False:
-            i=1
-            root = Node(self.tables[tableIndex].columns[columnIndex].elements[0], 0)
-            while i < len(self.tables[tableIndex].columns[columnIndex].elements):
-                # if condition(
-                #     self.tables[tableIndex].columns[columnIndex].elements[i], condValue
-                # ):
-                #     valsIndexes.append(i)
-                root.insert(self.tables[tableIndex].columns[columnIndex].elements[i], i)
-                i += 1
-            # root.PrintTree()
-            valsIndexes = root.findvalOnCond(condValue, condition, operator)
+            if self.tables[tableIndex].columns[columnIndex].indexed:
+                # print("Print tree...")
+                self.tables[tableIndex].columns[columnIndex].tree.PrintTree()
+                # print("Select ValIndexes...")
+                valsIndexes = self.tables[tableIndex].columns[columnIndex].tree.findvalOnCond(condValue, condition, operator)
+            else:
+                i = 0
+                while i < len(self.tables[tableIndex].columns[columnIndex].elements):
+                    if condition(
+                        self.tables[tableIndex].columns[columnIndex].elements[i], condValue
+                    ):
+                        valsIndexes.append(i)
+                    i += 1
+            #valsIndexes.sort()
             # print(valsIndexes)
         else:
             i = 0
@@ -281,11 +346,11 @@ class DB:
             while i < len(self.tables[tableIndex].columns[columnIndex].elements):
                 # print((self.tables[tableIndex].columns[columnIndex].elements[i], self.tables[tableIndex].columns[column2Index].elements[i]))
                 if condition(
-                    self.tables[tableIndex].columns[columnIndex].elements[i], self.tables[tableIndex].columns[column2Index].elements[i]
+                    self.tables[tableIndex].columns[columnIndex].elements[i],
+                    self.tables[tableIndex].columns[column2Index].elements[i],
                 ):
                     valsIndexes.append(i)
                 i += 1
-            
 
         # print(printString)
         # print(valsIndexes, columnsToPrintIndexes)
@@ -365,9 +430,9 @@ class DB:
         condition,
         condVal,
         operator,
-        isColum=False
+        isColum=False,
     ):
-        print("selecting left join on cond")
+        # print("selecting left join on cond")
         # print(tabName1, tabName2, colToPrint, colToAnal, colToJoin1, colToJoin2)
         table1Index = -1
         i = 0
@@ -416,14 +481,14 @@ class DB:
             while i < len(self.tables[table1Index].columns):
                 # if self.tables[table1Index].columns[i].columnName == name:
                 columns.append(
-                    column(self.tables[table1Index].columns[i].columnName, False)
+                    column(self.tables[table1Index].columns[i].columnName, self.tables[table1Index].columns[i].indexed)
                 )
                 i += 1
             i = 0
             while i < len(self.tables[table2Index].columns):
                 # if self.tables[table1Index].columns[i].columnName == name:
                 columns.append(
-                    column(self.tables[table2Index].columns[i].columnName, False)
+                    column(self.tables[table2Index].columns[i].columnName, self.tables[table2Index].columns[i].indexed)
                 )
                 i += 1
         else:
@@ -431,7 +496,7 @@ class DB:
                 i = 0
                 while i < len(self.tables[table1Index].columns):
                     if self.tables[table1Index].columns[i].columnName == name:
-                        columns.append(column(name, False))
+                        columns.append(column(name, self.tables[table1Index].columns[i].indexed))
                     i += 1
             for name in colToPrint:
                 i = 0
@@ -440,7 +505,7 @@ class DB:
                         self.tables[table2Index].columns[i].columnName == name
                         and i != colToJoin1Index
                     ):
-                        columns.append(column(name, False))
+                        columns.append(column(name, self.tables[table2Index].columns[i].indexed))
                     i += 1
         # print(columns)
         self.createTable("LEFT_JOIN TMPTABLE", columns)
@@ -475,6 +540,7 @@ class DB:
                     i += 1
         valueIndexs = []
         i = 0
+        k = 0
         while i < len(self.tables[table1Index].columns[colToJoin1Index].elements):
             j = 0
             while j < len(self.tables[table2Index].columns[colToJoin2Index].elements):
@@ -483,14 +549,14 @@ class DB:
                     == self.tables[table2Index].columns[colToJoin2Index].elements[j]
                 ):
                     valueIndexs.append((i, j))
-                elif len(valueIndexs) == 0:
-                    valueIndexs.append((i, -1))
-                elif valueIndexs[-1][0] != i:
-                    valueIndexs.append((i, -1))
                 j += 1
+            if len(valueIndexs) == 0:
+                valueIndexs.append((i, -1))
+            elif valueIndexs[-1][0] != i:
+                valueIndexs.append((i, -1))
             i += 1
         j = 0
-        print(valueIndexs)
+        # print(valueIndexs)
         # print("Values:",valueIndexs)
         # print("col 1", columnsToPrint1Indexes)
         # print("col 2", columnsToPrint2Indexes)
@@ -519,7 +585,15 @@ class DB:
         # print(
         #     self.tables[-1].columns[0].columnName, self.tables[-1].columns[1].columnName
         # )
-        self.selectOnCond("LEFT_JOIN TMPTABLE", "*", colToAnal, condVal, condition, operator, isColumn = isColum)
+        self.selectOnCond(
+            "LEFT_JOIN TMPTABLE",
+            "*",
+            colToAnal,
+            condVal,
+            condition,
+            operator,
+            isColumn=isColum,
+        )
         self.deleteTable("LEFT_JOIN TMPTABLE")
 
     def selectLeftJoinNoCond(
@@ -581,14 +655,14 @@ class DB:
             while i < len(self.tables[table1Index].columns):
                 # if self.tables[table1Index].columns[i].columnName == name:
                 columns.append(
-                    column(self.tables[table1Index].columns[i].columnName, False)
+                    column(self.tables[table1Index].columns[i].columnName, self.tables[table1Index].columns[i].indexed)
                 )
                 i += 1
             i = 0
             while i < len(self.tables[table2Index].columns):
                 # if self.tables[table1Index].columns[i].columnName == name:
                 columns.append(
-                    column(self.tables[table2Index].columns[i].columnName, False)
+                    column(self.tables[table2Index].columns[i].columnName, self.tables[table2Index].columns[i].indexed)
                 )
                 i += 1
         else:
@@ -596,7 +670,7 @@ class DB:
                 i = 0
                 while i < len(self.tables[table1Index].columns):
                     if self.tables[table1Index].columns[i].columnName == name:
-                        columns.append(column(name, False))
+                        columns.append(column(name, self.tables[table1Index].columns[i].indexed))
                     i += 1
             for name in colToPrint:
                 i = 0
@@ -605,7 +679,7 @@ class DB:
                         self.tables[table2Index].columns[i].columnName == name
                         and i != colToJoin1Index
                     ):
-                        columns.append(column(name, False))
+                        columns.append(column(name, self.tables[table2Index].columns[i].indexed))
                     i += 1
         # print(columns)
         self.createTable("LEFT_JOIN TMPTABLE", columns)
@@ -655,11 +729,11 @@ class DB:
                     # print("Values:",valueIndexs)
                     valueIndexs.append((i, j))
                     # print("Values:",valueIndexs)
-                elif len(valueIndexs) == 0:
-                    valueIndexs.append((i, -1))
-                elif valueIndexs[-1][0] != i:
-                    valueIndexs.append((i, -1))
                 j += 1
+            if len(valueIndexs) == 0:
+                valueIndexs.append((i, -1))
+            elif valueIndexs[-1][0] != i:
+                valueIndexs.append((i, -1))
             i += 1
         j = 0
         # print("Values:",valueIndexs)
@@ -709,7 +783,8 @@ class DB:
             col.elements = []
         return True
 
-    def deleteOnCond(self, tabName, colName, condition, condVal):
+    def deleteOnCond(self, tabName, colName, condition, condVal, isColumn = False):
+        # print("DeleteONCond", tabName, colName, condition, condVal)
         tableIndex = -1
         i = 0
         while i < len(self.tables):
@@ -718,7 +793,7 @@ class DB:
                 break
             i += 1
         if tableIndex == -1:
-            printError("Table not found")
+            printError("Table not found\ntabName -", tabName)
             return
         i = 0
         # rowsToDelete = []
@@ -731,64 +806,101 @@ class DB:
         if columnIndex == -1:
             printError("Column not found")
             return
-        while i < len(self.tables[tableIndex].columns[columnIndex].elements):
-            if condition(
-                self.tables[tableIndex].columns[columnIndex].elements[i], condVal
-            ):
-                j = 0
-                while j < len(self.tables[tableIndex].columns):
-                    self.tables[tableIndex].columns[j].elements.pop(i)
-                    j += 1
-                i -= 2
-            i += 1
+        if isColumn == False:
+            i = 0
+            while i < len(self.tables[tableIndex].columns[columnIndex].elements):
+                # print("If:", self.tables[tableIndex].columns[columnIndex].elements[i], condVal)
+                if condition(
+                    self.tables[tableIndex].columns[columnIndex].elements[i], condVal
+                ):
+                    # print("Cond work")
+                    j = 0
+                    while j < len(self.tables[tableIndex].columns):
+                        # print("Work...", self.tables[tableIndex].columns[j].elements[i])
+                        self.tables[tableIndex].columns[j].deleteElementByValue(self.tables[tableIndex].columns[j].elements[i])
+                        j += 1
+                    i -= 2
+                i += 1
+        else:
+            i = 0
+            column2Index = -1
+            while i < len(self.tables[tableIndex].columns):
+                if self.tables[tableIndex].columns[i].columnName == condVal:
+                    column2Index = i
+                    break
+                i += 1
+            i = 0
+            while i < len(self.tables[tableIndex].columns[columnIndex].elements):
+                # print((self.tables[tableIndex].columns[columnIndex].elements[i], self.tables[tableIndex].columns[column2Index].elements[i]))
+                if condition(
+                    self.tables[tableIndex].columns[columnIndex].elements[i],
+                    self.tables[tableIndex].columns[column2Index].elements[i],
+                ):
+                    j = 0
+                    while j < len(self.tables[tableIndex].columns):
+                        # print("Work...", self.tables[tableIndex].columns[j].elements[i])
+                        self.tables[tableIndex].columns[j].deleteElementByValue(self.tables[tableIndex].columns[j].elements[i])
+                        j += 1
+                    i -= 2
+                i += 1
+        
 
 
-def rightcond(param1, param2, database, table1, table2 = ""):
-    strToReturn = []
-    table1Index = -1
-    i = 0
-    while i < len(database.tables):
-        if database.tables[i].tableName == table1:
-            table1Index = i
-            break
-        i += 1
-    table2Index = -1
-    if table2 != "":   
+    def rightcond(self, param1, param2, table1, table2=""):
+        strToReturn = []
+        table1Index = -1
         i = 0
-        while i < len(database.tables):
-            if database.tables[i].tableName == table2:
-                table2Index = i
-                break
-            i += 1
-    if table2Index == -1 and table1Index == -1:
-        printError("Table not found")
-        return 
-    i = 0
-    columnIndex = -1
-    if table1Index != -1:
-        while i < len(database.tables[table1Index].columns):
-            if database.tables[table1Index].columns[i].columnName == param2:
-                columnIndex = i
-                break
-            i += 1
-    elif table2Index != -1:
-        while i < len(database.tables[table2Index].columns):
-            if database.tables[table2Index].columns[i].columnName == param2:
-                columnIndex = i
-                break
-            i += 1
-    strToReturn.append(param1)
-    strToReturn.append(param2)
-    if columnIndex == -1:
-        strToReturn.append(False)
-    else:
-        strToReturn.append(True)
-    return strToReturn
+        # print(len(self.tables))
 
+        while i < len(self.tables):
+            # print(
+            #     "self.tables[i].tableName =",
+            #     self.tables[i].tableName,
+            #     "table1 =",
+            #     table1,
+            # )
+            if self.tables[i].tableName == table1:
+                table1Index = i
+                break
+            i += 1
+        table2Index = -1
+        if table2 != "":
+            i = 0
+            while i < len(self.tables):
+                if self.tables[i].tableName == table2:
+                    table2Index = i
+                    break
+                i += 1
+        if table2Index == -1 and table1Index == -1:
+            printError("Table not found in rightcond")
+            return
+        i = 0
+        columnIndex = -1
+        # print("bp1")
+        if table1Index != -1:
+            while i < len(self.tables[table1Index].columns):
+                if self.tables[table1Index].columns[i].columnName == param2:
+                    columnIndex = i
+                    break
+                i += 1
+        elif table2Index != -1:
+            while i < len(self.tables[table2Index].columns):
+                if self.tables[table2Index].columns[i].columnName == param2:
+                    columnIndex = i
+                    break
+                i += 1
+        # print("bp2")
+        strToReturn.append(param1)
+        strToReturn.append(param2)
+        if columnIndex == -1:
+            strToReturn.append(False)
+        else:
+            strToReturn.append(True)
+        return strToReturn
 
-# print("Creating DB")
-# db = DB()
-# print("Setting its name as name")
-# db.setName("name")
-# print("Creating table")
-# db.createTable("TableName", [])
+    # print("Creating DB")
+    # db = DB()
+    # print("Setting its name as name")
+    # db.setName("name")
+    # print("Creating table")
+    # db.createTable("TableName", [])

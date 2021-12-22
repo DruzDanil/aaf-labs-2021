@@ -179,6 +179,7 @@ while cmdfile != ".EXIT":
                         "Command is wrond\n" + pe + "\nСolumn: {}".format(pe.column)
                     )
                 else:
+                    # print("Creating table...")
                     columnn = []
                     for i in parsed.colums:
                         if len(i) == 1:
@@ -186,12 +187,12 @@ while cmdfile != ".EXIT":
                         else:
                             columnn.append(column(i[0], True))
 
-                    # print("Creating table...")
+                   
                     if Database.createTable(parsed.table_name, columnn) == -1:
                         break
                     # print("Database tables debug:", Database.tables)
                     print('Table "' + parsed.table_name + '" was created.')
-                    print("Created table contains the following columns:")
+                    # print("Created table contains the following columns:")
                     for i in parsed.colums:
                         if len(i) == 1:
                             print(i[0] + " - non-indexed")
@@ -236,13 +237,13 @@ while cmdfile != ".EXIT":
                             + parsed.table1_name
                             + '"'
                         )
-                        str = rightcond(
+                        str = Database.rightcond(
                             parsed.condition_column_name,
                             parsed.value,
-                            Database,
-                            parsed.table1_name
+                            parsed.table1_name,
                         )
                         if str != None:
+                            # print("Selecting...")
                             if str[0] == parsed.condition_column_name:
                                 Database.selectOnCond(
                                     parsed.table1_name,
@@ -251,7 +252,7 @@ while cmdfile != ".EXIT":
                                     str[1],
                                     whatcond(parsed.operator, True),
                                     parsed.operator,
-                                    isColumn=str[2],                                    
+                                    isColumn=str[2],
                                 )
                                 # print(str[2])
                             else:
@@ -262,9 +263,9 @@ while cmdfile != ".EXIT":
                                     str[1],
                                     whatcond(parsed.operator, False),
                                     parsed.operator,
-                                    isColumn=str[2],                                    
+                                    isColumn=str[2],
                                 )
-                            print("Selected rows satisfying following condition:")
+                            # print("Selected rows satisfying following condition:")
                             a = ""
                             for i in parsed.condition:
                                 a = a + " " + i
@@ -277,11 +278,10 @@ while cmdfile != ".EXIT":
                             + '"'
                         )
                     elif parsed[1] != "*" and c == True and parsed.left_join == "":
-                        str = rightcond(
+                        str = Database.rightcond(
                             parsed.condition_column_name,
                             parsed.value,
-                            Database,
-                            parsed.table1_name
+                            parsed.table1_name,
                         )
                         print(parsed.operator)
                         if str != None:
@@ -337,14 +337,33 @@ while cmdfile != ".EXIT":
                             + '"'
                         )
                     elif parsed[1] != "*" and c == True and parsed.left_join != "":
-                        str = rightcond(
+                        print(
                             parsed.condition_column_name,
                             parsed.value,
                             Database,
                             parsed.table1_name,
-                            table2 = parsed.table2_name
+                            parsed.table2_name,
                         )
+                        str = Database.rightcond(
+                            parsed.condition_column_name,
+                            parsed.value,
+                            parsed.table1_name,
+                            table2=parsed.table2_name,
+                        )
+                        print(str)
                         if str != None:
+                            print(
+                                parsed.table1_name,
+                                parsed.table2_name,
+                                parsed.select_colum_names,
+                                str[0],  # col to analyze
+                                parsed.t1_column,
+                                parsed.t2_column,
+                                whatcond(parsed.operator, True),
+                                str[1],  # condval
+                                parsed.operator,
+                                str[2],
+                            )
                             if str[0] == parsed.condition_column_name:
                                 Database.selectLeftJoinOnCond(
                                     parsed.table1_name,
@@ -356,7 +375,7 @@ while cmdfile != ".EXIT":
                                     whatcond(parsed.operator, True),
                                     str[1],  # condval
                                     parsed.operator,
-                                    isColumn=str[2],
+                                    isColum=str[2],
                                 )
                             else:
                                 Database.selectLeftJoinOnCond(
@@ -369,7 +388,7 @@ while cmdfile != ".EXIT":
                                     whatcond(parsed.operator, False),
                                     str[1],
                                     parsed.operator,
-                                    isColumn=str[2],
+                                    isColum=str[2],
                                 )
                             print(
                                 'Rows has been selected from "'
@@ -399,12 +418,11 @@ while cmdfile != ".EXIT":
                             + parsed.table1_name
                             + '"'
                         )
-                        str = rightcond(
+                        str = Database.rightcond(
                             parsed.condition_column_name,
                             parsed.value,
-                            Database,
                             parsed.table1_name,
-                            parsed.table2_name
+                            parsed.table2_name,
                         )
                         if str != None:
                             if str[0] == parsed.condition_column_name:
@@ -418,7 +436,7 @@ while cmdfile != ".EXIT":
                                     whatcond(parsed.operator, True),
                                     str[1],
                                     parsed.operator,
-                                    isColumn=str[2],
+                                    isColum=str[2],
                                 )
                             else:
                                 Database.selectLeftJoinOnCond(
@@ -431,7 +449,7 @@ while cmdfile != ".EXIT":
                                     whatcond(parsed.operator, False),
                                     str[1],
                                     parsed.operator,
-                                    isColumn=str[2],
+                                    isColum=str[2],
                                 )
                             print("Selected rows satisfying following condition:")
                             a = ""
@@ -450,11 +468,10 @@ while cmdfile != ".EXIT":
                     for b in parsed:
                         if b.lower() == "where":
                             c = True
-                    str = rightcond(
+                    str = Database.rightcond(
                         parsed.condition_column_name,
                         parsed.value,
-                        Database,
-                        parsed.table1_name,
+                        parsed.table_name,
                     )
                     if c:
                         if str != None:
@@ -464,6 +481,7 @@ while cmdfile != ".EXIT":
                                     str[0],
                                     whatcond(parsed.operator, True),
                                     str[1],
+                                    isColumn = str[2]
                                 )
                             else:
                                 Database.deleteOnCond(
@@ -471,6 +489,7 @@ while cmdfile != ".EXIT":
                                     str[0],
                                     whatcond(parsed.operator, False),
                                     str[1],
+                                    isColumn = str[2]
                                 )
 
                             print(
@@ -484,7 +503,7 @@ while cmdfile != ".EXIT":
                                 a = a + i
                             print(a)
                     else:
-                        print(parsed.table_name)
+                        # print(parsed.table_name)
                         if Database.clearTable(parsed.table_name):
                             print('Table "' + parsed.table_name + '" was cleaned.')
                 pass

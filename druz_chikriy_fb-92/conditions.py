@@ -1,7 +1,5 @@
 # Сделать все возожные кондишены
 
-from classes import printError
-
 
 def equal(a, b):
     return a == b

@@ -6,14 +6,18 @@ INSERT INTO owners("1", "Misha", "30");
 INSERT INTO owners("1", "Zap", "30");
 INSERT cats ("10", "1", "Murzik");
 INSERT cats ("20", "1", "Pushok");
+SELECT owner_name, cat_name FROM owners LEFT_JOIN cats ON owner_id = cat_owner_id WHERE cat_name = "Murzik";
 SELECT * FROM owners WHERE owner_name = "Vasya";
 SELECT * FROM owners LEFT_JOIN cats ON owner_id = cat_owner_id;
 SELECT owner_name, cat_name FROM owners LEFT_JOIN cats ON owner_id = cat_owner_id;
 SELECT * FROM cats;
 SELECT cat_id, cat_owner_id FROM cats WHERE cat_name = "Murzik";
 SELECT owner_name, cat_name FROM owners LEFT_JOIN cats ON owner_id = cat_owner_id WHERE owner_name = "Vasya";
-DELETE FROM cats;
-DELETE cats WHERE cat_name = "Murzik";
-DELETE cats ;
-
 SELECT * FROM owners WHERE owner_id != owner_age;
+SELECT * FROM owners WHERE owner_id >= "1";
+SELECT * FROM owners WHERE owner_id <= "1";
+SELECT cat_id, cat_id FROM cats WHERE cat_name = "Murzik";
+DELETE FROM cats;
+
+DELETE cats ;
+DELETE cats WHERE cat_name = "Murzik";
